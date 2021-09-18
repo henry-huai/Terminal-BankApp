@@ -1,10 +1,10 @@
 package dev.huai;
 
-import dev.huai.services.LoginService;
+import dev.huai.services.MenuServices;
 
 public class App {
     public static void main(String args[]){
-        LoginService menu = new LoginService();
+        MenuServices menu = new MenuServices();
         menu.startMenu();
     }
 }

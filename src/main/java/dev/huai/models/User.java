@@ -1,11 +1,22 @@
 package dev.huai.models;
 
+import java.math.BigDecimal;
+
 public class User {
     private String firstName;
     private String lastName;
-    private String userId;
+    private Integer userId;
     private String password;
     private String email;
+    private BigDecimal balance;
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
 
     public String getEmail() {
         return email;
@@ -31,11 +42,11 @@ public class User {
         this.lastName = lastName;
     }
 
-    public String getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 

@@ -1,16 +1,15 @@
 package dev.huai.services;
 
+import dev.huai.data.UserData;
 import dev.huai.models.User;
 
-import java.io.Console;
-import java.sql.SQLOutput;
 import java.util.Scanner;
 
-public class LoginService {
+public class MenuServices {
 
+    private User user = new User();
+    private UserData userData = new UserData();
     Scanner sc = new Scanner(System.in);
-    private User newUser = new User();
-    private SignUpService signupService = new SignUpService();
 
     public void startMenu(){
         System.out.println("###Welcome to Revature Banking###");
@@ -26,6 +25,7 @@ public class LoginService {
         switch(selection) {
             case 1:
                 //jump to login in
+                userLogin();
                 break;
             case 2:
                 //jump to sign up
@@ -38,25 +38,61 @@ public class LoginService {
         }
     }
 
+    public void userLogin(){
+        System.out.println("###Login in###");
+        System.out.println("Please enter your user ID?");
+        // catch wrong format input user id
+        try{
+            Integer userID = Integer.parseInt(sc.nextLine());
+            user.setUserId(userID);
+        } catch (NumberFormatException e) {
+            System.out.println("Wrong user ID format");
+            userLogin();
+        }
+        System.out.println("Please enter your password?");
+        String password = sc.nextLine();
+        user.setPassword(password);
+        if(checkUser(user)){
+            accountMenu();
+        } else{
+            System.out.println("User not found!");
+            startMenu();
+        }
+
+    }
+
+    public boolean checkUser(User user){
+        return userData.checkUser(user);
+    }
+
     public void userSignUp(){
 
         System.out.println("###Sign Up###");
         System.out.println("Please enter your first name?");
         String firstName = sc.nextLine();
-        newUser.setFirstName(firstName);
+        user.setFirstName(firstName);
         System.out.println("Please enter your last name?");
         String lastName = sc.nextLine();
-        newUser.setLastName(lastName);
+        user.setLastName(lastName);
         System.out.println("Please enter your email?");
         String email = sc.nextLine();
-        newUser.setEmail(email);
+        user.setEmail(email);
         System.out.println("Please enter your password?");
         String password = sc.nextLine();
-        newUser.setPassword(password);
-        signupService.addUser(newUser);
+        user.setPassword(password);
+        addUser(user);
         System.out.println("Thank you for signing up!\n\n");
         startMenu();
     }
 
+    public void addUser(User newUser){
+        userData.addUser(newUser);
+    }
+
+    public void accountMenu(){
+        System.out.println("###Account Menu");
+        System.out.println("Please choose an action?");
+
+    }
 
 }
