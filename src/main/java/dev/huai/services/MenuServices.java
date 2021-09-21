@@ -1,7 +1,10 @@
 package dev.huai.services;
 
 import dev.huai.data.UserData;
+import dev.huai.models.Account;
 import dev.huai.models.User;
+
+import java.util.ArrayList;
 import java.util.Scanner;
 
 
@@ -24,19 +27,80 @@ public class MenuServices {
 
         switch(selection) {
             case 1:
-                //jump to login in
                 userLogin();
                 break;
             case 2:
-                //jump to sign up
                 userSignUp();
                 break;
             case 3:
-                return;
+                // I have to use exit() instead of return(), it will cause infinite loop
+                System.exit(0);
             default:
                 System.out.println("Unrecognized action!\n");
         }
         startMenu();
+    }
+
+    public void userMenu(User user){
+
+        System.out.println("---Account Menu---");
+        System.out.println("Please choose an action?");
+        System.out.println("0 - Create a new account");
+        ArrayList<Account> allAccounts = userData.printAccounts(user);
+        for(Account a : allAccounts){
+            System.out.println(allAccounts.indexOf(a)+1+ " - "+"Account #"+ a.getAccount_id());
+        }
+        System.out.println(allAccounts.size()+1+" - Exit");
+
+        int selection = sc.nextInt();
+        sc.nextLine();
+
+        if(selection == 0){
+            createAccount(user);
+            userMenu(user);
+        }
+        else if(selection == allAccounts.size()+1){
+            startMenu();
+        }
+        else{
+            //System.out.println("my selection account is "+allAccounts.get(selection));
+            accountMenu(allAccounts.get(selection-1), user);
+        }
+    }
+
+    public void accountMenu(Account account, User user){
+        System.out.println("---Account # "+account.getAccount_id()+"---");
+        System.out.println("Please choose an action?");
+        System.out.println("1 - Check balance");
+        System.out.println("2 - Deposit");
+        System.out.println("3 - Withdraw funds");
+        System.out.println("4 - Check transactions");
+        System.out.println("5 - Exit");
+
+        int selection = sc.nextInt();
+        sc.nextLine();
+
+        switch(selection) {
+            case 1:
+                checkBalance(account);
+                break;
+            case 2:
+                addFunds(account);
+                break;
+            case 3:
+                withdrawFunds(account, user);
+                break;
+            case 4:
+                checkTransactions(account);
+                break;
+            case 5:
+                userMenu(user);
+                break;
+                //return;
+            default:
+                System.out.println("Wrong input!");
+        }
+        accountMenu(account, user);
     }
 
     public void userLogin(){
@@ -55,7 +119,7 @@ public class MenuServices {
         String password = sc.nextLine();
         user.setPassword(password);
         if(checkUser(user)){
-            accountMenu(user);
+            userMenu(user);
         } else{
             System.out.println("User not found!");
             startMenu();
@@ -63,12 +127,7 @@ public class MenuServices {
 
     }
 
-    public boolean checkUser(User user){
-        return userData.checkUser(user);
-    }
-
     public void userSignUp(){
-
         System.out.println("---Sign Up---");
         System.out.println("Please enter your first name?");
         String firstName = sc.nextLine();
@@ -87,48 +146,21 @@ public class MenuServices {
         startMenu();
     }
 
+
+
+    public boolean checkUser(User user){
+        return userData.checkUser(user);
+    }
+
     public void addUser(User newUser){
         userData.addUser(newUser);
     }
 
-    public void accountMenu(User user){
-        System.out.println("---Account Menu---");
-        System.out.println("Please choose an action?");
-        System.out.println("1 - Check balance");
-        System.out.println("2 - Deposit");
-        System.out.println("3 - Withdraw funds");
-        System.out.println("4 - Check transactions");
-        System.out.println("5 - Exit");
-
-        int selection = sc.nextInt();
-        sc.nextLine();
-
-        switch(selection) {
-            case 1:
-                checkBalance(user);
-                break;
-            case 2:
-                addFunds(user);
-                break;
-            case 3:
-                withdrawFunds(user);
-                break;
-            case 4:
-                checkTransactions(user);
-                break;
-            case 5:
-                return;
-            default:
-                System.out.println("Wrong input!");
-        }
-        accountMenu(user);
+    public void checkBalance(Account account){
+        System.out.println("Your current balance is: $" + account.getBalance());
     }
 
-    public void checkBalance(User user){
-        System.out.println("Your current balance is: $" + user.getBalance());
-    }
-
-    public void addFunds(User user){
+    public void addFunds(Account account){
         System.out.println("Please enter deposit amount $");
         // catch wrong format input user id
         try{
@@ -136,16 +168,16 @@ public class MenuServices {
             Integer deposit = Integer.parseInt(sc.nextLine());
             if(deposit<0) {
                 System.out.println("Please enter a positive amount!");
-                addFunds(user);
+                addFunds(account);
             }
-            userData.depositFunds(deposit, user);
+            userData.depositFunds(deposit, account);
         } catch (NumberFormatException e) {
             System.out.println("Wrong deposit format");
-            addFunds(user);
+            addFunds(account);
         }
     }
 
-    public void withdrawFunds(User user){
+    public void withdrawFunds(Account account, User user){
         System.out.println("Please enter withdraw amount $");
         // catch wrong format input user id
         try{
@@ -153,25 +185,34 @@ public class MenuServices {
             Integer withdraw = Integer.parseInt(sc.nextLine());
             if(withdraw<0) {
                 System.out.println("Please enter a positive amount!");
-                withdrawFunds(user);
+                withdrawFunds(account, user);
             }
             // check if overdrawing
-            else if(withdraw > user.getBalance().intValue()){
+            else if(withdraw > account.getBalance().intValue()){
                 System.out.println("NO Overdrawing!");
-                System.out.println("Your account balance is: $" + user.getBalance());
-                withdrawFunds(user);
+                System.out.println("Your account balance is: $" + account.getBalance());
+                accountMenu(account, user);
             }
             else {
-                userData.withdrawFunds(withdraw, user);
+                userData.withdrawFunds(withdraw, account);
             }
         } catch (NumberFormatException e) {
             System.out.println("Wrong withdraw format");
-            withdrawFunds(user);
+            withdrawFunds(account, user);
         }
     }
 
-    public void checkTransactions(User user){
-        userData.printTransactions(user);
+    public void checkTransactions(Account account){
+        userData.printTransactions(account);
+    }
+
+    public void getAccounts(User user){
+        userData.printAccounts(user);
+    }
+
+    public void createAccount(User user){
+        //System.out.println("");
+        userData.addAccount(user);
     }
 
 }

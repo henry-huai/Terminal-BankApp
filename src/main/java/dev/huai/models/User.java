@@ -8,15 +8,7 @@ public class User {
     private Integer userId;
     private String password;
     private String email;
-    private BigDecimal balance;
 
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
 
     public String getEmail() {
         return email;
