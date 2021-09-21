@@ -16,6 +16,15 @@ public class UserData {
         return checkUserBySQL(user);
     }
 
+    public void depositFunds(Integer deposit, User user){
+        depositBySQL(deposit, user);
+    }
+
+    public void withdrawFunds(Integer deposit, User user){
+        withdrawBySQL(deposit, user);
+    }
+
+
     private void addUserBySQL(User newUser){
         String sql = "insert into users(first_name, last_name, email, pass_word) values(?, ?, ?, ?) returning user_id";
 
@@ -51,7 +60,7 @@ public class UserData {
                 user.setLastName(rs.getString("last_name"));
                 user.setEmail(rs.getString("email"));
                 user.setBalance(rs.getBigDecimal("amount_change"));
-                System.out.println(user.getFirstName() + " " + user.getLastName() + " " + " account balance :" + user.getBalance());
+                System.out.println(user.getFirstName() + " " + user.getLastName() + ", Welcome to your account! ");
                 return true;
             }
             else
@@ -61,6 +70,40 @@ public class UserData {
             throwables.printStackTrace();
         }
     return false;
+    }
+
+    private void depositBySQL(Integer deposit, User user){
+        String sql = "update users set amount_change = amount_change + ? where user_id = ? returning amount_change" ;
+        try{
+            Connection c = connectionService.establishConnection();
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1, deposit);
+            stmt.setInt(2, user.getUserId());
+            //store the return value user_id from database
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            user.setBalance(rs.getBigDecimal("amount_change"));
+            System.out.println("Your account balance is: $" + rs.getBigDecimal("amount_change"));;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    private void withdrawBySQL(Integer withdraw, User user){
+        String sql = "update users set amount_change = amount_change - ? where user_id = ? returning amount_change" ;
+        try{
+            Connection c = connectionService.establishConnection();
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1, withdraw);
+            stmt.setInt(2, user.getUserId());
+            //store the return value user_id from database
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            user.setBalance(rs.getBigDecimal("amount_change"));
+            System.out.println("Your account balance is: $" + rs.getBigDecimal("amount_change"));;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
 }
