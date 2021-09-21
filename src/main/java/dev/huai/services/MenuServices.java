@@ -2,9 +2,6 @@ package dev.huai.services;
 
 import dev.huai.data.UserData;
 import dev.huai.models.User;
-
-import java.math.BigDecimal;
-import java.sql.SQLOutput;
 import java.util.Scanner;
 
 
@@ -100,7 +97,8 @@ public class MenuServices {
         System.out.println("1 - Check balance");
         System.out.println("2 - Deposit");
         System.out.println("3 - Withdraw funds");
-        System.out.println("4 - Exit");
+        System.out.println("4 - Check transactions");
+        System.out.println("5 - Exit");
 
         int selection = sc.nextInt();
         sc.nextLine();
@@ -116,6 +114,9 @@ public class MenuServices {
                 withdrawFunds(user);
                 break;
             case 4:
+                checkTransactions(user);
+                break;
+            case 5:
                 return;
             default:
                 System.out.println("Wrong input!");
@@ -167,6 +168,10 @@ public class MenuServices {
             System.out.println("Wrong withdraw format");
             withdrawFunds(user);
         }
+    }
+
+    public void checkTransactions(User user){
+        userData.printTransactions(user);
     }
 
 }
