@@ -4,7 +4,9 @@ import dev.huai.data.UserData;
 import dev.huai.models.Account;
 import dev.huai.models.User;
 
+import java.io.Console;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 
@@ -12,6 +14,7 @@ public class MenuServices {
 
     private User user = new User();
     private UserData userData = new UserData();
+    private PasswordService passwordService = new PasswordService();
     Scanner sc = new Scanner(System.in);
 
     public void startMenu(){
@@ -104,12 +107,13 @@ public class MenuServices {
     }
 
     public void userLogin(){
+
         System.out.println("---Login in---");
         System.out.println("Please enter your user ID?");
         // catch wrong format input user id
         try{
             Integer userID = Integer.parseInt(sc.nextLine());
-            //int userID = sc.nextInt();
+
             user.setUserId(userID);
         } catch (NumberFormatException e) {
             System.out.println("Wrong user ID format");
@@ -117,7 +121,12 @@ public class MenuServices {
         }
         System.out.println("Please enter your password?");
         String password = sc.nextLine();
-        user.setPassword(password);
+
+        //Console console = System.console();
+        //char[] passcode = console.readPassword("Please enter your password: ");
+        //String password = new String(passcode);
+        user.setPassword(passwordService.encryptPassword(password));
+        //Arrays.fill(passcode,' ');
         if(checkUser(user)){
             userMenu(user);
         } else{
@@ -140,7 +149,8 @@ public class MenuServices {
         user.setEmail(email);
         System.out.println("Please enter your password?");
         String password = sc.nextLine();
-        user.setPassword(password);
+        user.setPassword(passwordService.encryptPassword(password));
+        //user.setPassword(password);
         addUser(user);
         System.out.println("Thank you for signing up!\n\n");
         startMenu();
