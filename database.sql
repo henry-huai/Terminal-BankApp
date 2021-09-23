@@ -14,8 +14,7 @@ create table users(
 
 create table accounts(
 	account_id serial primary key,
-	user_id serial not null references users,
-	balance Numeric(12,2) not null default 0
+	user_id serial not null references users
 );
 
 create table transactions(
@@ -23,5 +22,4 @@ create table transactions(
 	transaction_id serial primary key,
 	transaction_date Date not null default current_date,
 	amount_change Numeric(12,2) not null default 0
-
 );

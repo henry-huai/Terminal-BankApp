@@ -40,6 +40,10 @@ public class UserData {
         addAccountBySQL(user);
     }
 
+    public void checkBalance(Account account){
+        checkBalanceBySQL(account);
+    }
+
     private void addUserBySQL(User newUser){
         String sql = "insert into users(first_name, last_name, email, pass_word) values(?, ?, ?, ?) returning user_id";
 
@@ -63,7 +67,6 @@ public class UserData {
         String sql = "select * from users where user_id =? and pass_word = ?";
         try{
             Connection c = connectionService.establishConnection();
-            //Statement stmt = c.createStatement();
             PreparedStatement stmt = c.prepareStatement(sql);
             stmt.setInt(1, user.getUserId());
             stmt.setString(2, user.getPassword());
@@ -74,7 +77,6 @@ public class UserData {
                 user.setFirstName(rs.getString("first_name"));
                 user.setLastName(rs.getString("last_name"));
                 user.setEmail(rs.getString("email"));
-                //user.setBalance(rs.getBigDecimal("balance"));
                 System.out.println(user.getFirstName() + " " + user.getLastName() + ", Welcome to your account! ");
                 return true;
             }
@@ -87,46 +89,46 @@ public class UserData {
     return false;
     }
 
-    private void depositBySQL(Integer deposit, Account account){
-        String sql1 = "update accounts set balance = balance + ? where account_id = ? returning balance";
-        String sql2 = "insert into transactions (account_id, amount_change) values(?, ?)" ;
+    private void checkBalanceBySQL(Account account){
+        String sql = "select coalesce(sum(amount_change), 0) as balance from transactions where account_id = ?;";
         try{
             Connection c = connectionService.establishConnection();
-            PreparedStatement stmt1 = c.prepareStatement(sql1);
-            stmt1.setInt(1, deposit);
-            stmt1.setInt(2, account.getAccount_id());
-            PreparedStatement stmt2 = c.prepareStatement(sql2);
-            stmt2.setInt(1, account.getAccount_id());
-            stmt2.setInt(2, deposit);
-            //store the return value user_id from database
-            stmt2.executeUpdate();
-            ResultSet rs = stmt1.executeQuery();
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1, account.getAccount_id());
 
+            //store the return value user_id from database
+            ResultSet rs = stmt.executeQuery();
             rs.next();
             account.setBalance(rs.getBigDecimal("balance"));
-            System.out.println("Your account balance is: $" + rs.getBigDecimal("balance"));;
+            System.out.println("Account balance is $"+account.getBalance());
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    private void depositBySQL(Integer deposit, Account account){
+        String sql = "insert into transactions (account_id, amount_change) values(?, ?)" ;
+        try{
+            Connection c = connectionService.establishConnection();
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1, account.getAccount_id());
+            stmt.setInt(2, deposit);
+            //store the return value user_id from database
+            stmt.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
     private void withdrawBySQL(Integer withdraw, Account account){
-        String sql1 = "update accounts set balance = balance - ? where account_id = ? returning balance" ;
-        String sql2 = "insert into transactions (account_id, amount_change) values(?, ?)" ;
+        String sql = "insert into transactions (account_id, amount_change) values(?, ?)" ;
         try{
             Connection c = connectionService.establishConnection();
-            PreparedStatement stmt1 = c.prepareStatement(sql1);
-            stmt1.setInt(1, withdraw);
-            stmt1.setInt(2, account.getAccount_id());
-            PreparedStatement stmt2 = c.prepareStatement(sql2);
-            stmt2.setInt(1, account.getAccount_id());
-            stmt2.setInt(2, -withdraw);
-            //store the return value user_id from database
-            stmt2.executeUpdate();
-            ResultSet rs = stmt1.executeQuery();
-            rs.next();
-            account.setBalance(rs.getBigDecimal("balance"));
-            System.out.println("Your account balance is: $" + rs.getBigDecimal("balance"));;
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1, account.getAccount_id());
+            stmt.setInt(2, -withdraw);
+            stmt.executeUpdate();
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -134,7 +136,7 @@ public class UserData {
 
     private void printTransactionsBySQL(Account account){
         String sql = "select * from transactions where account_id = ?";
-        //ArrayList<Transaction> allTransactions = new ArrayList<Transaction>();
+
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
@@ -149,7 +151,6 @@ public class UserData {
                 t.setTransaction_date(date);
                 t.setAmount_change(amount_change);
                 System.out.println(date +" " + amount_change);
-                //allTransactions.add(t);
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -165,15 +166,11 @@ public class UserData {
             stmt.setInt(1,user.getUserId());
             ResultSet rs = stmt.executeQuery();
 
-            //System.out.println("Here are your transactions:");
             while(rs.next()){
                 Account a = new Account();
                 a.setAccount_id(rs.getInt("account_id"));
                 a.setUser_id(user.getUserId());
-                a.setBalance(rs.getBigDecimal("balance"));
                 allAccounts.add(a);
-                //System.out.println("Account #"+ a.getAccount_id());
-                //allTransactions.add(t);
             }
 
         } catch (SQLException throwables) {
@@ -184,7 +181,6 @@ public class UserData {
 
     private void addAccountBySQL(User user){
         String sql = "insert into accounts (user_id) values(?) returning account_id";
-        //ArrayList<Account> allAccount = new ArrayList<Account>();
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);

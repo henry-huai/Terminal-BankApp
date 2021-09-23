@@ -5,6 +5,7 @@ import dev.huai.models.Account;
 import dev.huai.models.User;
 
 import java.io.Console;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -85,7 +86,7 @@ public class MenuServices {
 
         switch(selection) {
             case 1:
-                checkBalance(account);
+                getBalance(account);
                 break;
             case 2:
                 addFunds(account);
@@ -133,7 +134,6 @@ public class MenuServices {
             System.out.println("User not found!");
             startMenu();
         }
-
     }
 
     public void userSignUp(){
@@ -164,10 +164,6 @@ public class MenuServices {
 
     public void addUser(User newUser){
         userData.addUser(newUser);
-    }
-
-    public void checkBalance(Account account){
-        System.out.println("Your current balance is: $" + account.getBalance());
     }
 
     public void addFunds(Account account){
@@ -214,6 +210,10 @@ public class MenuServices {
 
     public void checkTransactions(Account account){
         userData.printTransactions(account);
+    }
+
+    public void getBalance(Account account){
+        userData.checkBalance(account);
     }
 
     public void getAccounts(User user){
