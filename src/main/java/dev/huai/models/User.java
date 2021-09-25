@@ -9,6 +9,10 @@ public class User {
     private String password;
     private String email;
 
+    public User(){
+        super();
+    }
+
 
     public String getEmail() {
         return email;

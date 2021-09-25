@@ -48,6 +48,10 @@ public class UserData {
         checkBalanceBySQL(account);
     }
 
+    public void addAuthorizedUser(Account account, Integer authorized_user_id){
+        addAuthorizedUserBySQL(account, authorized_user_id);
+    }
+
     private void addUserBySQL(User newUser){
         String sql = "insert into users(first_name, last_name, email, pass_word) values(?, ?, ?, ?) returning user_id";
 
@@ -194,18 +198,21 @@ public class UserData {
     }
 
     private ArrayList<Account> printAccountsBySQL(User user){
-        String sql = "select * from accounts where user_id = ?";
+        String sql = "select * from accounts where user_id = ? or authorized_user_id = ?";
         ArrayList<Account> allAccounts = new ArrayList<Account>();
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
             stmt.setInt(1,user.getUserId());
+            stmt.setInt(2,user.getUserId());
             ResultSet rs = stmt.executeQuery();
 
             while(rs.next()){
                 Account a = new Account();
                 a.setAccount_id(rs.getInt("account_id"));
-                a.setUser_id(user.getUserId());
+                a.setUser_id(rs.getInt("user_id"));
+                a.setAuthorized_user_id(rs.getInt("authorized_user_id"));
+
                 allAccounts.add(a);
             }
         } catch (SQLException e) {
@@ -215,7 +222,7 @@ public class UserData {
     }
 
     private void addAccountBySQL(User user){
-        String sql = "insert into accounts (user_id) values(?) returning account_id";
+        String sql = "insert into accounts (user_id,authorized_user_id) values(?, null) returning account_id";
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
@@ -225,6 +232,31 @@ public class UserData {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             System.out.println("Your new account number is: " + rs.getInt("account_id"));;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addAuthorizedUserBySQL(Account account, Integer authorized_user_id){
+        String sql1 = "select account_id from accounts where authorized_user_id = ? ";
+        String sql = "update accounts set authorized_user_id = ? where account_id = ?";
+        try{
+            Connection c = connectionService.establishConnection();
+
+            PreparedStatement stmt1 = c.prepareStatement(sql1);
+            stmt1.setInt(1, authorized_user_id);
+
+            // if statement checks the recipient's existence before executing transactions
+            if(!stmt1.executeQuery().next()){
+                System.out.println("The user account doesn't exit");
+            }
+            else{
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1, authorized_user_id);
+            stmt.setInt(2, account.getAccount_id());
+            account.setAuthorized_user_id(authorized_user_id);
+            //store the return value user_id from database
+            stmt.executeUpdate();}
         } catch (SQLException e) {
             e.printStackTrace();
         }

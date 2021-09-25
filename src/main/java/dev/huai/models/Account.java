@@ -6,6 +6,19 @@ public class Account {
     private int account_id;
     private int user_id;
     private BigDecimal balance = BigDecimal.ZERO;
+    private int authorized_user_id;
+
+    public int getAuthorized_user_id() {
+        return authorized_user_id;
+    }
+
+    public void setAuthorized_user_id(int authorized_user_id) {
+        this.authorized_user_id = authorized_user_id;
+    }
+
+    public Account(){
+        super();
+    }
 
     public BigDecimal getBalance() {
         return balance;

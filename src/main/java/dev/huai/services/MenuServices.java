@@ -34,7 +34,7 @@ public class MenuServices {
                 userSignUp();
                 break;
             case 3:
-                // I have to use exit() instead of return(), otherwise it will cause infinite loop
+                //use exit() instead of return(), otherwise it will cause infinite loop
                 System.exit(0);
             default:
                 System.out.println("Unrecognized action!\n");
@@ -43,7 +43,6 @@ public class MenuServices {
     }
 
     public void userMenu(User user){
-
         System.out.println("---Account Menu---");
         System.out.println("Please choose an action:");
         System.out.println("1 - Create a new account");
@@ -69,42 +68,87 @@ public class MenuServices {
     }
 
     public void accountMenu(Account account, User user){
-        System.out.println("---Account # "+account.getAccount_id()+"---");
-        System.out.println("Please choose an action:");
-        System.out.println("1 - Check balance");
-        System.out.println("2 - Deposit");
-        System.out.println("3 - Withdraw funds");
-        System.out.println("4 - Check transactions");
-        System.out.println("5 - Transfer funds");
-        System.out.println("6 - Exit account");
 
-        //calculate balance from transaction table and set the value into the account variable
-        getBalance(account);
-        int selection = sc.nextInt();
-        sc.nextLine();
+        // check if the user is the main user or an authorized user
+        // define: authorized user has no access adding authorized user
+        if(account.getUser_id()==user.getUserId()) {
+            System.out.println("---Account # " + account.getAccount_id() + "---");
+            System.out.println("Please choose an action:");
+            System.out.println("1 - Check balance");
+            System.out.println("2 - Deposit");
+            System.out.println("3 - Withdraw funds");
+            System.out.println("4 - Check transactions");
+            System.out.println("5 - Transfer funds");
+            System.out.println("6 - Add an authorized user");
+            System.out.println("7 - Exit account");
 
-        switch(selection) {
-            case 1:
-                System.out.println("Your account balance is $"+account.getBalance());
-                break;
-            case 2:
-                addFunds(account);
-                break;
-            case 3:
-                withdrawFunds(account, user);
-                break;
-            case 4:
-                checkTransactions(account);
-                break;
-            case 5:
-                transferFunds(account, user);
-                break;
-            case 6:
-                userMenu(user);
-                break;
-                //return;
-            default:
-                System.out.println("Wrong input!");
+            //precalculate balance from transaction table and update the value into the account variable
+            getBalance(account);
+            int selection = sc.nextInt();
+            sc.nextLine();
+
+            switch (selection) {
+                case 1:
+                    System.out.println("Your account balance is $" + account.getBalance());
+                    break;
+                case 2:
+                    addFunds(account);
+                    break;
+                case 3:
+                    withdrawFunds(account, user);
+                    break;
+                case 4:
+                    checkTransactions(account);
+                    break;
+                case 5:
+                    transferFunds(account, user);
+                    break;
+                case 6:
+                    addAuthorizedUser(account);
+                    break;
+                case 7:
+                    userMenu(user);
+                    break;
+                default:
+                    System.out.println("Wrong input!");
+            }
+        }else{
+            System.out.println("---Authorized Account # " + account.getAccount_id() + "---");
+            System.out.println("Please choose an action:");
+            System.out.println("1 - Check balance");
+            System.out.println("2 - Deposit");
+            System.out.println("3 - Withdraw funds");
+            System.out.println("4 - Check transactions");
+            System.out.println("5 - Transfer funds");
+            System.out.println("6 - Exit account");
+
+            //precalculate balance from transaction table and update the value into the account variable
+            getBalance(account);
+            int selection = sc.nextInt();
+            sc.nextLine();
+
+            switch (selection) {
+                case 1:
+                    System.out.println("Your account balance is $" + account.getBalance());
+                    break;
+                case 2:
+                    addFunds(account);
+                    break;
+                case 3:
+                    withdrawFunds(account, user);
+                    break;
+                case 4:
+                    checkTransactions(account);
+                    break;
+                case 5:
+                    transferFunds(account, user);
+                    break;
+                case 6:
+                    userMenu(user);
+                    break;
+                default:
+                    System.out.println("Wrong input!");
+            }
         }
         accountMenu(account, user);
     }
@@ -124,16 +168,15 @@ public class MenuServices {
 
         try{
             Console console = System.console();
-            // System.console() works in console, return null in IDE
+            // System.console() works in console, returns null in IDE
+            System.out.println("Please enter your password:");
             if(console==null){
-                System.out.println("No console available");
-                System.out.println("Please enter your password:");
+                //System.out.println("No console available");
                 String password = sc.nextLine();
                 user.setPassword(passwordService.encryptPassword(password));
             }
-            // if no console which I am testing the code in IDE
+            // if no console available like testing the code in IDE
             else{
-                System.out.println("Please enter your password:");
                 char[] passcode = console.readPassword();
                 String password = new String(passcode);
                 user.setPassword(passwordService.encryptPassword(password));
@@ -169,8 +212,6 @@ public class MenuServices {
         startMenu();
     }
 
-
-
     public boolean checkUser(User user){
         return userData.checkUser(user);
     }
@@ -179,12 +220,15 @@ public class MenuServices {
         userData.addUser(newUser);
     }
 
+    public void getBalance(Account account){
+        userData.checkBalance(account);
+    }
+
     public void addFunds(Account account){
         System.out.println("Please enter deposit amount $");
         // catch wrong format input user id
         try{
-            //Integer deposit = sc.nextInt();
-            Integer deposit = Integer.parseInt(sc.nextLine());
+            int deposit = Integer.parseInt(sc.nextLine());
             if(deposit<0) {
                 System.out.println("Please enter a positive amount!");
                 addFunds(account);
@@ -200,8 +244,7 @@ public class MenuServices {
         System.out.println("Please enter withdraw amount $");
         // catch wrong format input user id
         try{
-            //Integer deposit = sc.nextInt();
-            Integer withdraw = Integer.parseInt(sc.nextLine());
+            int withdraw = Integer.parseInt(sc.nextLine());
             if(withdraw<0) {
                 System.out.println("Please enter a positive amount!");
                 withdrawFunds(account, user);
@@ -225,28 +268,18 @@ public class MenuServices {
         userData.printTransactions(account);
     }
 
-    public void getBalance(Account account){
-        userData.checkBalance(account);
-    }
-
-    public void getAccounts(User user){
-        userData.printAccounts(user);
-    }
-
     public void createAccount(User user){
-        //System.out.println("");
         userData.addAccount(user);
     }
 
     public void transferFunds(Account account, User user){
         System.out.println("Please enter recipient account number");
-        Integer recipient = Integer.parseInt(sc.nextLine());
+        int recipient = Integer.parseInt(sc.nextLine());
 
         System.out.println("Please enter transfer amount $");
         // catch wrong format input user id
         try{
-            //Integer deposit = sc.nextInt();
-            Integer transfer = Integer.parseInt(sc.nextLine());
+            int transfer = Integer.parseInt(sc.nextLine());
             if(transfer<0) {
                 System.out.println("Please enter a positive amount!");
                 transferFunds(account, user);
@@ -264,6 +297,12 @@ public class MenuServices {
             System.out.println("Wrong transfer funds format");
             transferFunds(account, user);
         }
+    }
+
+    public void addAuthorizedUser(Account account){
+        System.out.println("Please enter authorized user ID number");
+        int authorized_user_id = Integer.parseInt(sc.nextLine());
+        userData.addAuthorizedUser(account, authorized_user_id);
     }
 
 }

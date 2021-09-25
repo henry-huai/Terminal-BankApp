@@ -1,12 +1,15 @@
 package dev.huai.models;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.util.Date;
 
 public class Transaction {
     private Date transaction_date;
     private BigDecimal amount_change;
+
+    public Transaction(){
+        super();
+    }
 
     public Date getTransaction_date() {
         return transaction_date;
