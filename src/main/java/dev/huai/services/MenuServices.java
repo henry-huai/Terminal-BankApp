@@ -5,9 +5,7 @@ import dev.huai.models.Account;
 import dev.huai.models.User;
 
 import java.io.Console;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 
@@ -23,9 +21,8 @@ public class MenuServices {
         System.out.println("Please choose an action:");
         System.out.println("1 - Login in");
         System.out.println("2 - Sign up");
-        System.out.println("3 - Exit");
+        System.out.println("3 - Exit app");
 
-        //Scanner sc = new Scanner(System.in);
         int selection = sc.nextInt();
         sc.nextLine();
 
@@ -37,7 +34,7 @@ public class MenuServices {
                 userSignUp();
                 break;
             case 3:
-                // I have to use exit() instead of return(), it will cause infinite loop
+                // I have to use exit() instead of return(), otherwise it will cause infinite loop
                 System.exit(0);
             default:
                 System.out.println("Unrecognized action!\n");
@@ -48,45 +45,47 @@ public class MenuServices {
     public void userMenu(User user){
 
         System.out.println("---Account Menu---");
-        System.out.println("Please choose an action?");
-        System.out.println("0 - Create a new account");
+        System.out.println("Please choose an action:");
+        System.out.println("1 - Create a new account");
         ArrayList<Account> allAccounts = userData.printAccounts(user);
         for(Account a : allAccounts){
-            System.out.println(allAccounts.indexOf(a)+1+ " - "+"Account #"+ a.getAccount_id());
+            System.out.println(allAccounts.indexOf(a)+2+ " - "+"Account #"+ a.getAccount_id());
         }
-        System.out.println(allAccounts.size()+1+" - Exit");
+        System.out.println(allAccounts.size()+2+" - Sign off");
 
         int selection = sc.nextInt();
         sc.nextLine();
 
-        if(selection == 0){
+        if(selection == 1){
             createAccount(user);
             userMenu(user);
         }
-        else if(selection == allAccounts.size()+1){
+        else if(selection == allAccounts.size()+2){
             startMenu();
         }
         else{
-            //System.out.println("my selection account is "+allAccounts.get(selection));
-            accountMenu(allAccounts.get(selection-1), user);
+            accountMenu(allAccounts.get(selection-2), user);
         }
     }
 
     public void accountMenu(Account account, User user){
         System.out.println("---Account # "+account.getAccount_id()+"---");
-        System.out.println("Please choose an action?");
+        System.out.println("Please choose an action:");
         System.out.println("1 - Check balance");
         System.out.println("2 - Deposit");
         System.out.println("3 - Withdraw funds");
         System.out.println("4 - Check transactions");
-        System.out.println("5 - Exit");
+        System.out.println("5 - Transfer funds");
+        System.out.println("6 - Exit account");
 
+        //calculate balance from transaction table and set the value into the account variable
+        getBalance(account);
         int selection = sc.nextInt();
         sc.nextLine();
 
         switch(selection) {
             case 1:
-                getBalance(account);
+                System.out.println("Your account balance is $"+account.getBalance());
                 break;
             case 2:
                 addFunds(account);
@@ -98,6 +97,9 @@ public class MenuServices {
                 checkTransactions(account);
                 break;
             case 5:
+                transferFunds(account, user);
+                break;
+            case 6:
                 userMenu(user);
                 break;
                 //return;
@@ -110,23 +112,35 @@ public class MenuServices {
     public void userLogin(){
 
         System.out.println("---Login in---");
-        System.out.println("Please enter your user ID?");
+        System.out.println("Please enter your user ID:");
         // catch wrong format input user id
         try{
             Integer userID = Integer.parseInt(sc.nextLine());
-
             user.setUserId(userID);
         } catch (NumberFormatException e) {
             System.out.println("Wrong user ID format");
             userLogin();
         }
-        System.out.println("Please enter your password?");
-        String password = sc.nextLine();
 
-        //Console console = System.console();
-        //char[] passcode = console.readPassword("Please enter your password: ");
-        //String password = new String(passcode);
-        user.setPassword(passwordService.encryptPassword(password));
+        try{
+            Console console = System.console();
+            // System.console() works in console, return null in IDE
+            if(console==null){
+                System.out.println("No console available");
+                System.out.println("Please enter your password:");
+                String password = sc.nextLine();
+                user.setPassword(passwordService.encryptPassword(password));
+            }
+            // if no console which I am testing the code in IDE
+            else{
+                System.out.println("Please enter your password:");
+                char[] passcode = console.readPassword();
+                String password = new String(passcode);
+                user.setPassword(passwordService.encryptPassword(password));
+            }
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
         //Arrays.fill(passcode,' ');
         if(checkUser(user)){
             userMenu(user);
@@ -138,19 +152,18 @@ public class MenuServices {
 
     public void userSignUp(){
         System.out.println("---Sign Up---");
-        System.out.println("Please enter your first name?");
+        System.out.println("Please enter your first name:");
         String firstName = sc.nextLine();
         user.setFirstName(firstName);
-        System.out.println("Please enter your last name?");
+        System.out.println("Please enter your last name:");
         String lastName = sc.nextLine();
         user.setLastName(lastName);
-        System.out.println("Please enter your email?");
+        System.out.println("Please enter your email:");
         String email = sc.nextLine();
         user.setEmail(email);
-        System.out.println("Please enter your password?");
+        System.out.println("Please enter your password:");
         String password = sc.nextLine();
         user.setPassword(passwordService.encryptPassword(password));
-        //user.setPassword(password);
         addUser(user);
         System.out.println("Thank you for signing up!\n\n");
         startMenu();
@@ -223,6 +236,34 @@ public class MenuServices {
     public void createAccount(User user){
         //System.out.println("");
         userData.addAccount(user);
+    }
+
+    public void transferFunds(Account account, User user){
+        System.out.println("Please enter recipient account number");
+        Integer recipient = Integer.parseInt(sc.nextLine());
+
+        System.out.println("Please enter transfer amount $");
+        // catch wrong format input user id
+        try{
+            //Integer deposit = sc.nextInt();
+            Integer transfer = Integer.parseInt(sc.nextLine());
+            if(transfer<0) {
+                System.out.println("Please enter a positive amount!");
+                transferFunds(account, user);
+            }
+            // check if overdrawing
+            else if(transfer > account.getBalance().intValue()){
+                System.out.println("Funds not available!");
+                System.out.println("Your account balance is: $" + account.getBalance());
+                accountMenu(account, user);
+            }
+            else {
+                userData.transferFunds(transfer, account, recipient);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Wrong transfer funds format");
+            transferFunds(account, user);
+        }
     }
 
 }

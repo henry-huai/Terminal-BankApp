@@ -28,6 +28,10 @@ public class UserData {
         withdrawBySQL(deposit, account);
     }
 
+    public void transferFunds(Integer deposit, Account account, Integer recipient){
+        transferBySQL(deposit, account, recipient);
+    }
+
     public void printTransactions(Account account){
         printTransactionsBySQL(account);
     }
@@ -58,8 +62,8 @@ public class UserData {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             System.out.println("Your login user ID is: " + rs.getInt("user_id"));;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -81,16 +85,15 @@ public class UserData {
                 return true;
             }
             else
-                //System.out.println("wrong user");
                 return false;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     return false;
     }
 
     private void checkBalanceBySQL(Account account){
-        String sql = "select coalesce(sum(amount_change), 0) as balance from transactions where account_id = ?;";
+        String sql = "select coalesce(sum(amount_change), 0.00) as balance from transactions where account_id = ?;";
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
@@ -100,9 +103,9 @@ public class UserData {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             account.setBalance(rs.getBigDecimal("balance"));
-            System.out.println("Account balance is $"+account.getBalance());
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            //System.out.println("Account balance is $"+account.getBalance());
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -113,10 +116,11 @@ public class UserData {
             PreparedStatement stmt = c.prepareStatement(sql);
             stmt.setInt(1, account.getAccount_id());
             stmt.setInt(2, deposit);
+            account.setBalance(account.getBalance().add(BigDecimal.valueOf(deposit)));
             //store the return value user_id from database
             stmt.executeUpdate();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -127,10 +131,42 @@ public class UserData {
             PreparedStatement stmt = c.prepareStatement(sql);
             stmt.setInt(1, account.getAccount_id());
             stmt.setInt(2, -withdraw);
+
+            account.setBalance(account.getBalance().subtract(BigDecimal.valueOf(withdraw)));
             stmt.executeUpdate();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void transferBySQL(Integer transfer, Account account, Integer recipient){
+        String sql1 = "select account_id from accounts where account_id = ? ";
+        String sql = "insert into transactions (account_id, amount_change) values(?, ?)" ;
+        try{
+
+            Connection c = connectionService.establishConnection();
+
+            PreparedStatement stmt1 = c.prepareStatement(sql1);
+            stmt1.setInt(1, recipient);
+
+            // if statement checks the recipient's existence before executing transactions
+            if(!stmt1.executeQuery().next()){
+                System.out.println("The recipient account doesn't exit");
+            }
+            else{
+                PreparedStatement stmt2 = c.prepareStatement(sql);
+                stmt2.setInt(1, recipient);
+                stmt2.setInt(2, transfer);
+                stmt2.executeUpdate();
+
+                PreparedStatement stmt3 = c.prepareStatement(sql);
+                stmt3.setInt(1, account.getAccount_id());
+                stmt3.setInt(2, -transfer);
+                stmt3.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -152,8 +188,8 @@ public class UserData {
                 t.setAmount_change(amount_change);
                 System.out.println(date +" " + amount_change);
             }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -172,9 +208,8 @@ public class UserData {
                 a.setUser_id(user.getUserId());
                 allAccounts.add(a);
             }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return allAccounts;
     }
@@ -190,8 +225,8 @@ public class UserData {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             System.out.println("Your new account number is: " + rs.getInt("account_id"));;
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

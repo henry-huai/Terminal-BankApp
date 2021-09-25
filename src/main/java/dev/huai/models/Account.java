@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 public class Account {
     private int account_id;
     private int user_id;
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     public BigDecimal getBalance() {
         return balance;
