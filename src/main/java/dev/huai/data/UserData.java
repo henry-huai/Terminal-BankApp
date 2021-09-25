@@ -238,7 +238,7 @@ public class UserData {
     }
 
     private void addAuthorizedUserBySQL(Account account, Integer authorized_user_id){
-        String sql1 = "select account_id from accounts where authorized_user_id = ? ";
+        String sql1 = "select user_id from users where user_id = ? ";
         String sql = "update accounts set authorized_user_id = ? where account_id = ?";
         try{
             Connection c = connectionService.establishConnection();
@@ -246,7 +246,7 @@ public class UserData {
             PreparedStatement stmt1 = c.prepareStatement(sql1);
             stmt1.setInt(1, authorized_user_id);
 
-            // if statement checks the recipient's existence before executing transactions
+            // if statement checks the user's existence before adding the user
             if(!stmt1.executeQuery().next()){
                 System.out.println("The user account doesn't exit");
             }

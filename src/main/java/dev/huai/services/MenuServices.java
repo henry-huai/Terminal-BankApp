@@ -79,7 +79,7 @@ public class MenuServices {
             System.out.println("3 - Withdraw funds");
             System.out.println("4 - Check transactions");
             System.out.println("5 - Transfer funds");
-            System.out.println("6 - Add an authorized user");
+            System.out.println("6 - Add authorized user");
             System.out.println("7 - Exit account");
 
             //precalculate balance from transaction table and update the value into the account variable
@@ -300,9 +300,33 @@ public class MenuServices {
     }
 
     public void addAuthorizedUser(Account account){
-        System.out.println("Please enter authorized user ID number");
-        int authorized_user_id = Integer.parseInt(sc.nextLine());
-        userData.addAuthorizedUser(account, authorized_user_id);
+        if(account.getAuthorized_user_id()==0){
+            System.out.println("Please enter authorized user ID number");
+            int authorized_user_id = Integer.parseInt(sc.nextLine());
+            userData.addAuthorizedUser(account, authorized_user_id);
+        }
+        else{
+            System.out.println("Your current authorized user id:"+account.getAuthorized_user_id());
+            System.out.println("Please select action:");
+            System.out.println("1 - Update authorized user by ID");
+            System.out.println("2 - Return account menu");
+            try{
+
+                Integer selection = Integer.parseInt(sc.nextLine());
+                if(selection == 1){
+                    System.out.println("Please enter authorized user ID number");
+                    int authorized_user_id = Integer.parseInt(sc.nextLine());
+                    userData.addAuthorizedUser(account, authorized_user_id);
+                }
+                else if(selection==2){
+                    return;
+                }
+                //user.setUserId(userID);
+            } catch (NumberFormatException e) {
+                System.out.println("Wrong selection");
+                addAuthorizedUser(account);
+            }
+        }
     }
 
 }
