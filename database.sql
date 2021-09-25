@@ -14,7 +14,8 @@ create table users(
 
 create table accounts(
 	account_id serial primary key,
-	user_id serial not null references users
+	user_id serial not null references users(user_id),
+	authorized_user_id int references users(user_id)
 );
 
 create table transactions(
