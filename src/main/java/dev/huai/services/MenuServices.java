@@ -300,32 +300,33 @@ public class MenuServices {
     }
 
     public void addAuthorizedUser(Account account){
-        if(account.getAuthorized_user_id()==0){
-            System.out.println("Please enter authorized user ID number");
-            int authorized_user_id = Integer.parseInt(sc.nextLine());
-            userData.addAuthorizedUser(account, authorized_user_id);
-        }
-        else{
-            System.out.println("Your current authorized user id:"+account.getAuthorized_user_id());
-            System.out.println("Please select action:");
-            System.out.println("1 - Update authorized user by ID");
-            System.out.println("2 - Return account menu");
-            try{
+        try{
+            if(account.getAuthorized_user_id()==0){
+                System.out.println("Please enter authorized user ID number");
+                int authorized_user_id = Integer.parseInt(sc.nextLine());
+                userData.addAuthorizedUser(account, authorized_user_id);
+            }
+            else {
+                System.out.println("Your current authorized user id:" + account.getAuthorized_user_id());
+                System.out.println("Please choose an action:");
+                System.out.println("1 - Update authorized user by ID");
+                System.out.println("2 - Return account menu");
 
-                Integer selection = Integer.parseInt(sc.nextLine());
-                if(selection == 1){
+                int selection = Integer.parseInt(sc.nextLine());
+                if (selection == 1) {
                     System.out.println("Please enter authorized user ID number");
                     int authorized_user_id = Integer.parseInt(sc.nextLine());
                     userData.addAuthorizedUser(account, authorized_user_id);
-                }
-                else if(selection==2){
+                } else if (selection == 2) {
                     return;
+                } else {
+                    System.out.println("Wrong input");
+                    addAuthorizedUser(account);
                 }
-                //user.setUserId(userID);
-            } catch (NumberFormatException e) {
-                System.out.println("Wrong selection");
-                addAuthorizedUser(account);
             }
+        } catch (NumberFormatException e) {
+            System.out.println("Wrong input");
+            addAuthorizedUser(account);
         }
     }
 
