@@ -1,12 +1,15 @@
 package dev.huai.models;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class Account {
     private int account_id;
     private int user_id;
     private BigDecimal balance = BigDecimal.ZERO;
     private int authorized_user_id;
+
+
 
     public int getAuthorized_user_id() {
         return authorized_user_id;

@@ -53,6 +53,7 @@ public class UserData {
     }
 
     private void addUserBySQL(User newUser){
+
         String sql = "insert into users(first_name, last_name, email, pass_word) values(?, ?, ?, ?) returning user_id";
 
         try{
@@ -72,7 +73,9 @@ public class UserData {
     }
 
     private boolean checkUserBySQL(User user){
+
         String sql = "select * from users where user_id =? and pass_word = ?";
+
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
@@ -97,7 +100,9 @@ public class UserData {
     }
 
     private void checkBalanceBySQL(Account account){
+
         String sql = "select coalesce(sum(amount_change), 0.00) as balance from transactions where account_id = ?;";
+
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
@@ -114,7 +119,9 @@ public class UserData {
     }
 
     private void depositBySQL(Integer deposit, Account account){
+
         String sql = "insert into transactions (account_id, amount_change) values(?, ?)" ;
+
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
@@ -129,7 +136,9 @@ public class UserData {
     }
 
     private void withdrawBySQL(Integer withdraw, Account account){
+
         String sql = "insert into transactions (account_id, amount_change) values(?, ?)" ;
+
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
@@ -144,37 +153,31 @@ public class UserData {
         }
     }
 
+
     private void transferBySQL(Integer transfer, Account account, Integer recipient){
-        String sql1 = "select account_id from accounts where account_id = ? ";
-        String sql = "insert into transactions (account_id, amount_change) values(?, ?)" ;
+
+        String sql = "BEGIN;select account_id from accounts where account_id = ?; insert into transactions (account_id, amount_change) values(?, ?);insert into transactions (account_id, amount_change) values(?, ?); COMMIT;" ;
+
         try{
 
             Connection c = connectionService.establishConnection();
 
-            PreparedStatement stmt1 = c.prepareStatement(sql1);
-            stmt1.setInt(1, recipient);
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1, recipient);
+            stmt.setInt(2, recipient);
+            stmt.setInt(3, transfer);
+            stmt.setInt(4,account.getAccount_id());
+            stmt.setInt(5,-transfer);
+            stmt.execute();
 
-            // if statement checks the recipient's existence before executing transactions
-            if(!stmt1.executeQuery().next()){
-                System.out.println("The recipient account doesn't exit");
-            }
-            else{
-                PreparedStatement stmt2 = c.prepareStatement(sql);
-                stmt2.setInt(1, recipient);
-                stmt2.setInt(2, transfer);
-                stmt2.executeUpdate();
-
-                PreparedStatement stmt3 = c.prepareStatement(sql);
-                stmt3.setInt(1, account.getAccount_id());
-                stmt3.setInt(2, -transfer);
-                stmt3.executeUpdate();
-            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("The recipient account doesn't exit");
         }
     }
 
+
     private void printTransactionsBySQL(Account account){
+
         String sql = "select * from transactions where account_id = ?";
 
         try{
@@ -198,8 +201,10 @@ public class UserData {
     }
 
     private ArrayList<Account> printAccountsBySQL(User user){
+
         String sql = "select * from accounts where user_id = ? or authorized_user_id = ?";
         ArrayList<Account> allAccounts = new ArrayList<Account>();
+
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
@@ -222,7 +227,9 @@ public class UserData {
     }
 
     private void addAccountBySQL(User user){
+
         String sql = "insert into accounts (user_id,authorized_user_id) values(?, null) returning account_id";
+
         try{
             Connection c = connectionService.establishConnection();
             PreparedStatement stmt = c.prepareStatement(sql);
@@ -238,27 +245,23 @@ public class UserData {
     }
 
     private void addAuthorizedUserBySQL(Account account, Integer authorized_user_id){
-        String sql1 = "select user_id from users where user_id = ? ";
-        String sql = "update accounts set authorized_user_id = ? where account_id = ?";
+
+        String sql = "BEGIN; select user_id from users where user_id = ?; update accounts set authorized_user_id = ? where account_id = ?; COMMIT;";
+
         try{
             Connection c = connectionService.establishConnection();
 
-            PreparedStatement stmt1 = c.prepareStatement(sql1);
-            stmt1.setInt(1, authorized_user_id);
-
-            // if statement checks the user's existence before adding the user
-            if(!stmt1.executeQuery().next()){
-                System.out.println("The user account doesn't exit");
-            }
-            else{
             PreparedStatement stmt = c.prepareStatement(sql);
             stmt.setInt(1, authorized_user_id);
-            stmt.setInt(2, account.getAccount_id());
+            stmt.setInt(2, authorized_user_id);
+            stmt.setInt(3, account.getAccount_id());
+            stmt.execute();
+
+            // if transactions go through, update the account authorized_user
             account.setAuthorized_user_id(authorized_user_id);
-            //store the return value user_id from database
-            stmt.executeUpdate();}
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("The user account doesn't exit");
         }
     }
+
 }
