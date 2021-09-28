@@ -16,6 +16,7 @@ public class MenuServices {
     private PasswordService passwordService = new PasswordService();
     Scanner sc = new Scanner(System.in);
 
+    // Main menu displays
     public void startMenu(){
         System.out.println("---Welcome to Revature Banking---");
         System.out.println("Please choose an action:");
@@ -42,6 +43,7 @@ public class MenuServices {
         startMenu();
     }
 
+    // User menu displays after user pass verification
     public void userMenu(User user){
         System.out.println("---Account Menu---");
         System.out.println("Please choose an action:");
@@ -67,10 +69,11 @@ public class MenuServices {
         }
     }
 
+    // Account menu displays after user selects the account
     public void accountMenu(Account account, User user){
 
-        // check if the user is the main user or an authorized user
-        // define: authorized user has no access adding authorized user
+        // Condition checks if the user is the "main user" or an authorized user
+        // definition: authorized user has no access adding authorized user
         if(account.getUser_id()==user.getUserId()) {
             System.out.println("---Account # " + account.getAccount_id() + "---");
             System.out.println("Please choose an action:");
