@@ -1,6 +1,6 @@
 package dev.huai.services;
 
-import dev.huai.data.UserData;
+import dev.huai.data.UserDataImpl;
 import dev.huai.models.Account;
 import dev.huai.models.User;
 
@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class MenuServices {
 
     private User user = new User();
-    private UserData userData = new UserData();
+    private UserDataImpl userData = new UserDataImpl();
     private PasswordService passwordService = new PasswordService();
     Scanner sc = new Scanner(System.in);
 
@@ -46,7 +46,7 @@ public class MenuServices {
         System.out.println("---Account Menu---");
         System.out.println("Please choose an action:");
         System.out.println("1 - Create a new account");
-        ArrayList<Account> allAccounts = userData.printAccounts(user);
+        ArrayList<Account> allAccounts = userData.getAccounts(user);
         for(Account a : allAccounts){
             System.out.println(allAccounts.indexOf(a)+2+ " - "+"Account #"+ a.getAccount_id());
         }

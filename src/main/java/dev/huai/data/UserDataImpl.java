@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class UserData {
+public class UserDataImpl implements UserDataDao {
     private ConnectionService connectionService = new ConnectionService();
 
     public void addUser(User newUser){
@@ -36,8 +36,8 @@ public class UserData {
         printTransactionsBySQL(account);
     }
 
-    public ArrayList<Account> printAccounts(User user){
-        return printAccountsBySQL(user);
+    public ArrayList<Account> getAccounts(User user){
+        return getAccountsBySQL(user);
     }
 
     public void addAccount(User user){
@@ -200,7 +200,7 @@ public class UserData {
         }
     }
 
-    private ArrayList<Account> printAccountsBySQL(User user){
+    private ArrayList<Account> getAccountsBySQL(User user){
 
         String sql = "select * from accounts where user_id = ? or authorized_user_id = ?";
         ArrayList<Account> allAccounts = new ArrayList<Account>();
@@ -257,7 +257,7 @@ public class UserData {
             stmt.setInt(3, account.getAccount_id());
             stmt.execute();
 
-            // if transactions go through, update the account authorized_user
+            // if transactions go through successfully, update the account authorized_user
             account.setAuthorized_user_id(authorized_user_id);
         } catch (SQLException e) {
             System.out.println("The user account doesn't exit");
