@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 public class UserDataImpl implements UserDataDao {
     private ConnectionService connectionService = new ConnectionService();
-    private final Logger logger = Logger.getLogger(String.valueOf(UserDataImpl.class));
+    //private final Logger logger = Logger.getLogger(String.valueOf(UserDataImpl.class));
 
     public void addUser(User newUser){
         addUserBySQL(newUser);
@@ -132,7 +132,7 @@ public class UserDataImpl implements UserDataDao {
             account.setBalance(account.getBalance().add(BigDecimal.valueOf(deposit)));
             //store the return value user_id from database
             stmt.executeUpdate();
-            logger.info("Deposit Transaction completed");
+            //logger.info("Deposit Transaction completed");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -150,7 +150,7 @@ public class UserDataImpl implements UserDataDao {
 
             account.setBalance(account.getBalance().subtract(BigDecimal.valueOf(withdraw)));
             stmt.executeUpdate();
-            logger.info("Withdraw Transaction completed");
+            //logger.info("Withdraw Transaction completed");
 
         } catch (SQLException e) {
             e.printStackTrace();
