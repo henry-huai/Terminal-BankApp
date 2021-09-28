@@ -21,4 +21,4 @@
 13. password is encrypted in database
 
 ## ER diagram for my database
-[](https://gitlab.com/210907-java-ms-ext/renhan_huai/project0/-/blob/main/ERD.png)
+![ERD](https://gitlab.com/210907-java-ms-ext/renhan_huai/project0/-/blob/main/ERD.png?raw=true)
