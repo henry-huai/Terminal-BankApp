@@ -63,6 +63,7 @@ public class AccountServices {
                 default:
                     System.out.println("Wrong input!");
             }
+            accountMenu(account, user);
         }else{
             System.out.println("\n---Authorized Account # " + account.getAccount_id() + "---");
             System.out.println("Please choose an action:");
@@ -99,8 +100,8 @@ public class AccountServices {
                 default:
                     System.out.println("Wrong input!");
             }
+            accountMenu(account, user);
         }
-        accountMenu(account, user);
     }
 
     public void getBalance(Account account){
@@ -213,6 +214,4 @@ public class AccountServices {
             addAuthorizedUserMenu(account);
         }
     }
-
-
 }
