@@ -20,3 +20,5 @@
 12. only account creator has the access to adding authorized user
 13. password is encrypted in database
 
+## ER diagram for my database
+![ERD](https://gitlab.com/210907-java-ms-ext/renhan_huai/project0/-/blob/main/ERD.png?raw=true)
