@@ -54,6 +54,10 @@ public class UserDataImpl implements UserDataDao {
         addAuthorizedUserBySQL(account, authorized_user_id);
     }
 
+    public void removeAuthorizedUser(Account account){
+        removeAuthorizedUserBySQL(account);
+    }
+
     private void addUserBySQL(User newUser){
 
         String sql = "insert into users(first_name, last_name, email, pass_word) values(?, ?, ?, ?) returning user_id";
@@ -114,7 +118,7 @@ public class UserDataImpl implements UserDataDao {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             account.setBalance(rs.getBigDecimal("balance"));
-            //System.out.println("Account balance is $"+account.getBalance());
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -130,7 +134,7 @@ public class UserDataImpl implements UserDataDao {
             stmt.setInt(1, account.getAccount_id());
             stmt.setInt(2, deposit);
             account.setBalance(account.getBalance().add(BigDecimal.valueOf(deposit)));
-            //store the return value user_id from database
+
             stmt.executeUpdate();
             //logger.info("Deposit Transaction completed");
         } catch (SQLException e) {
@@ -165,7 +169,6 @@ public class UserDataImpl implements UserDataDao {
         try{
 
             Connection c = connectionService.establishConnection();
-
             PreparedStatement stmt = c.prepareStatement(sql);
             stmt.setInt(1, recipient);
             stmt.setInt(2, recipient);
@@ -191,6 +194,8 @@ public class UserDataImpl implements UserDataDao {
             ResultSet rs = stmt.executeQuery();
 
             System.out.println("Here are your transactions:");
+
+            // create transaction object and print out all transactions
             while(rs.next()){
                 Date date = rs.getDate("transaction_date");
                 BigDecimal amount_change = rs.getBigDecimal("amount_change");
@@ -206,7 +211,7 @@ public class UserDataImpl implements UserDataDao {
 
     private ArrayList<Account> getAccountsBySQL(User user){
 
-        String sql = "select * from accounts where user_id = ? or authorized_user_id = ?";
+        String sql = "select * from accounts account_id where user_id = ? or authorized_user_id = ? order by account_id ASC";
         ArrayList<Account> allAccounts = new ArrayList<Account>();
 
         try{
@@ -221,7 +226,6 @@ public class UserDataImpl implements UserDataDao {
                 a.setAccount_id(rs.getInt("account_id"));
                 a.setUser_id(rs.getInt("user_id"));
                 a.setAuthorized_user_id(rs.getInt("authorized_user_id"));
-
                 allAccounts.add(a);
             }
         } catch (SQLException e) {
@@ -264,8 +268,24 @@ public class UserDataImpl implements UserDataDao {
             // if transactions go through successfully, update the account authorized_user
             account.setAuthorized_user_id(authorized_user_id);
         } catch (SQLException e) {
-            System.out.println("The user account doesn't exit");
+            System.out.println("The user id doesn't exit");
         }
     }
 
+    private void removeAuthorizedUserBySQL(Account account) {
+        String sql = "update accounts set authorized_user_id = null where account_id = ?";
+
+        try {
+            Connection c = connectionService.establishConnection();
+
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1, account.getAccount_id());
+            stmt.execute();
+
+            // if transactions go through successfully, update the account authorized_user
+            account.setAuthorized_user_id(0);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

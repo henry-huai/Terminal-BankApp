@@ -25,4 +25,6 @@ public interface UserDataDao {
     public void checkBalance(Account account);
 
     public void addAuthorizedUser(Account account, Integer authorized_user_id);
+
+    public void removeAuthorizedUser(Account account);
 }
