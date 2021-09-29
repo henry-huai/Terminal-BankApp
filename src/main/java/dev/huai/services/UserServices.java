@@ -6,6 +6,7 @@ import dev.huai.models.User;
 
 import java.io.Console;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class UserServices {
@@ -31,21 +32,27 @@ public class UserServices {
             System.out.println(allAccounts.indexOf(a)+2+ " - "+"Account #"+ a.getAccount_id());
         }
         System.out.println(allAccounts.size()+2+" - Sign off");
+        try {
+            int selection = sc.nextInt();
+            sc.nextLine();
 
-        int selection = sc.nextInt();
-        sc.nextLine();
-
-        if(selection == 1){
-            accountServices.createAccount(user);
-            userMenu(user);
+            if (selection == 1) {
+                accountServices.createAccount(user);
+                userMenu(user);
+            } else if (selection == allAccounts.size() + 2) {
+                return;
+            } else if(selection <  allAccounts.size() + 2){
+                accountServices.accountMenu(allAccounts.get(selection - 2), user);
+                userMenu(user);
+            }
+            else{
+                System.out.println("Wrong action");
+                userMenu(user);
+            }
+        }catch(InputMismatchException e) {
+            System.out.println("Wrong action");
         }
-        else if(selection == allAccounts.size()+2){
-            return;
-        }
-        else{
-            accountServices.accountMenu(allAccounts.get(selection-2), user);
-            userMenu(user);
-        }
+        //userMenu(user);
     }
 
 
