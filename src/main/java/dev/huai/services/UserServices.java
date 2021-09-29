@@ -84,7 +84,6 @@ public class UserServices {
         if(checkUser(user)){
             userMenu(user);
         } else{
-            System.out.println("User not found!");
             return;
         }
     }

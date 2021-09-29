@@ -1,18 +1,16 @@
-package dev.huai.data;
+package huai.data;
 
-import dev.huai.models.Account;
-import dev.huai.models.Transaction;
-import dev.huai.models.User;
-import dev.huai.services.ConnectionService;
+import huai.models.Account;
+import huai.models.Transaction;
+import huai.models.User;
+import huai.services.ConnectionService;
 
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 public class UserDataImpl implements UserDataDao {
     private ConnectionService connectionService = new ConnectionService();
-    //private final Logger logger = Logger.getLogger(String.valueOf(UserDataImpl.class));
 
     public void addUser(User newUser){
         addUserBySQL(newUser);
@@ -54,10 +52,6 @@ public class UserDataImpl implements UserDataDao {
         addAuthorizedUserBySQL(account, authorized_user_id);
     }
 
-    public void removeAuthorizedUser(Account account){
-        removeAuthorizedUserBySQL(account);
-    }
-
     private void addUserBySQL(User newUser){
 
         String sql = "insert into users(first_name, last_name, email, pass_word) values(?, ?, ?, ?) returning user_id";
@@ -80,38 +74,25 @@ public class UserDataImpl implements UserDataDao {
 
     private boolean checkUserBySQL(User user){
 
-        String sql1 = "select * from users where user_id =?";
-        String sql2 = "select * from users where user_id =? and pass_word = ?";
+        String sql = "select * from users where user_id =? and pass_word = ?";
 
         try{
             Connection c = connectionService.establishConnection();
-            PreparedStatement stmt1 = c.prepareStatement(sql1);
-            stmt1.setInt(1, user.getUserId());
-            ResultSet rs1 = stmt1.executeQuery();
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1, user.getUserId());
+            stmt.setString(2, user.getPassword());
 
-            if(rs1.next()){
-                PreparedStatement stmt2 = c.prepareStatement(sql2);
-                stmt2.setInt(1, user.getUserId());
-                stmt2.setString(2, user.getPassword());
-
-                //store the return value user_id from database
-                ResultSet rs = stmt2.executeQuery();
-                if(rs.next()) {
-                    user.setFirstName(rs.getString("first_name"));
-                    user.setLastName(rs.getString("last_name"));
-                    user.setEmail(rs.getString("email"));
-                    System.out.println(user.getFirstName() + " " + user.getLastName() + ", Welcome to your account! ");
-                    return true;
-                }
-                else{
-                    System.out.println("Password doesn't match the user ID");
-                    return false;
-                }
+            //store the return value user_id from database
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()) {
+                user.setFirstName(rs.getString("first_name"));
+                user.setLastName(rs.getString("last_name"));
+                user.setEmail(rs.getString("email"));
+                System.out.println(user.getFirstName() + " " + user.getLastName() + ", Welcome to your account! ");
+                return true;
             }
-            else{
-                System.out.println("User ID not found");
+            else
                 return false;
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -131,7 +112,7 @@ public class UserDataImpl implements UserDataDao {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             account.setBalance(rs.getBigDecimal("balance"));
-
+            //System.out.println("Account balance is $"+account.getBalance());
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -147,9 +128,8 @@ public class UserDataImpl implements UserDataDao {
             stmt.setInt(1, account.getAccount_id());
             stmt.setInt(2, deposit);
             account.setBalance(account.getBalance().add(BigDecimal.valueOf(deposit)));
-
+            //store the return value user_id from database
             stmt.executeUpdate();
-            //logger.info("Deposit Transaction completed");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -167,7 +147,6 @@ public class UserDataImpl implements UserDataDao {
 
             account.setBalance(account.getBalance().subtract(BigDecimal.valueOf(withdraw)));
             stmt.executeUpdate();
-            //logger.info("Withdraw Transaction completed");
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -182,6 +161,7 @@ public class UserDataImpl implements UserDataDao {
         try{
 
             Connection c = connectionService.establishConnection();
+
             PreparedStatement stmt = c.prepareStatement(sql);
             stmt.setInt(1, recipient);
             stmt.setInt(2, recipient);
@@ -207,8 +187,6 @@ public class UserDataImpl implements UserDataDao {
             ResultSet rs = stmt.executeQuery();
 
             System.out.println("Here are your transactions:");
-
-            // create transaction object and print out all transactions
             while(rs.next()){
                 Date date = rs.getDate("transaction_date");
                 BigDecimal amount_change = rs.getBigDecimal("amount_change");
@@ -224,7 +202,7 @@ public class UserDataImpl implements UserDataDao {
 
     private ArrayList<Account> getAccountsBySQL(User user){
 
-        String sql = "select * from accounts account_id where user_id = ? or authorized_user_id = ? order by account_id ASC";
+        String sql = "select * from accounts where user_id = ? or authorized_user_id = ?";
         ArrayList<Account> allAccounts = new ArrayList<Account>();
 
         try{
@@ -239,6 +217,7 @@ public class UserDataImpl implements UserDataDao {
                 a.setAccount_id(rs.getInt("account_id"));
                 a.setUser_id(rs.getInt("user_id"));
                 a.setAuthorized_user_id(rs.getInt("authorized_user_id"));
+
                 allAccounts.add(a);
             }
         } catch (SQLException e) {
@@ -281,24 +260,8 @@ public class UserDataImpl implements UserDataDao {
             // if transactions go through successfully, update the account authorized_user
             account.setAuthorized_user_id(authorized_user_id);
         } catch (SQLException e) {
-            System.out.println("The user id doesn't exit");
+            System.out.println("The user account doesn't exit");
         }
     }
 
-    private void removeAuthorizedUserBySQL(Account account) {
-        String sql = "update accounts set authorized_user_id = null where account_id = ?";
-
-        try {
-            Connection c = connectionService.establishConnection();
-
-            PreparedStatement stmt = c.prepareStatement(sql);
-            stmt.setInt(1, account.getAccount_id());
-            stmt.execute();
-
-            // if transactions go through successfully, update the account authorized_user
-            account.setAuthorized_user_id(0);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }
