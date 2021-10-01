@@ -32,6 +32,7 @@ public class UserServices {
             System.out.println(allAccounts.indexOf(a)+2+ " - "+"Account #"+ a.getAccount_id());
         }
         System.out.println(allAccounts.size()+2+" - Sign off");
+
         try {
             int selection = sc.nextInt();
             sc.nextLine();
@@ -51,6 +52,7 @@ public class UserServices {
             }
         }catch(InputMismatchException e) {
             System.out.println("Wrong action");
+            userMenu(user);
         }
         //userMenu(user);
     }
